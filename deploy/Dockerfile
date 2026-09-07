@@ -33,7 +33,7 @@ RUN dotnet publish src/Eventarium.Server/Eventarium.Server.csproj \
 
 FROM mcr.microsoft.com/dotnet/aspnet:${ASPNET_VERSION} AS final
 WORKDIR /app
-EXPOSE 8080
+EXPOSE 8080 8443
 COPY --link --from=build /app .
 USER $APP_UID
 ENTRYPOINT ["dotnet", "Eventarium.Server.dll"]
