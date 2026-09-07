@@ -1,0 +1,87 @@
+﻿@page "/"
+@implements IDisposable
+@inject HomePageViewModel ViewModel
+
+<PageTitle>Eventarium</PageTitle>
+
+<main class="loading-screen">
+    <header class="masthead">
+        <div class="wordmark">
+            <h1 class="wordmark-name">Eventarium</h1>
+        </div>
+        <div class="connection-state" aria-live="polite">
+            <span class="status-light"></span>
+            <span>@ViewModel.Status</span>
+        </div>
+    </header>
+
+    <section class="flight-zone" aria-label="@ViewModel.EventRegionLabel">
+        @foreach (var item in ViewModel.ActiveEvents)
+        {
+            <a class="flying-event @item.KindCssClass"
+               style="@item.CssVariables"
+               href="@item.Url"
+               target="_blank"
+               rel="noopener noreferrer"
+               title="@ViewModel.OpenEventTitle"
+               @onanimationend="() => ViewModel.CompleteFlight(item.DisplayId)"
+               @key="item.DisplayId">
+                <span class="flying-event-body">
+                    <span class="flying-event-payload">
+                        <span class="package" aria-hidden="true">
+                            <span class="package-top"></span>
+                            <span class="package-side"></span>
+                            <span class="package-face">
+                                <EventOcticon Kind="item.Kind" Size="21" />
+                            </span>
+                        </span>
+                        <span class="event-copy">
+                            <span class="event-kicker">
+                                <span>@item.EventLabel · @item.SourceKind</span>
+                                <span class="event-repository">@item.Repository</span>
+                            </span>
+                            <span class="event-summary">@item.Summary</span>
+                            <span class="event-author">@GetAuthorLabel(item)</span>
+                        </span>
+                    </span>
+                </span>
+            </a>
+        }
+    </section>
+
+    @if (ViewModel.Sources.Count > 0)
+    {
+        <footer class="screen-footer" aria-label="Configured forge sources">
+            <span>@GetSourceSummary()</span>
+        </footer>
+    }
+</main>
+
+@code {
+    protected override void OnInitialized()
+    {
+        ViewModel.Changed += HandleViewModelChanged;
+    }
+
+    public void Dispose()
+    {
+        ViewModel.Changed -= HandleViewModelChanged;
+    }
+
+    private string GetSourceSummary()
+    {
+        string sourceLabel = ViewModel.Sources.Count == 1 ? "source" : "sources";
+        string forgeKinds = string.Join(" · ", ViewModel.Sources
+            .Select(source => source.Descriptor.Kind)
+            .Distinct(StringComparer.OrdinalIgnoreCase));
+        return $"{ViewModel.Sources.Count} {sourceLabel} · {forgeKinds}";
+    }
+
+    // Keep distinct source names visible without repeating the forge kind (for example, "GitHub").
+    private static string GetAuthorLabel(DisplayedForgeEvent item) =>
+        string.Equals(item.SourceName, item.SourceKind, StringComparison.OrdinalIgnoreCase)
+            ? item.Author
+            : $"{item.Author} · {item.SourceName}";
+
+    private void HandleViewModelChanged() => _ = InvokeAsync(StateHasChanged);
+}

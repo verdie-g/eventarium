@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+artifacts/
+.git/
+.idea/
+.vs/
+.vscode/
+.vibe/
+.env
+*.DotSettings.user
+*.pptx

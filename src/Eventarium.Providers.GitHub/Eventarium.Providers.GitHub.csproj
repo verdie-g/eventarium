@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <EmbeddedResource Include="GitHubEmojiAliases.json" LogicalName="Eventarium.Providers.GitHub.GitHubEmojiAliases.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Eventarium.Core/Eventarium.Core.csproj" />
+  </ItemGroup>
+
+</Project>
