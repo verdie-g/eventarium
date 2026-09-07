@@ -36,10 +36,10 @@ jobs:
           workloads: wasm-tools
 
       - name: Restore
-        run: dotnet restore Eventarium.slnx
+        run: dotnet restore src/Eventarium.slnx
 
       - name: Build
-        run: dotnet build Eventarium.slnx --configuration Release --no-restore
+        run: dotnet build src/Eventarium.slnx --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test Eventarium.slnx --configuration Release --no-build
+        run: dotnet test src/Eventarium.slnx --configuration Release --no-build

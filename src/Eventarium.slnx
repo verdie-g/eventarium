@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Eventarium.Client/Eventarium.Client.csproj" />
+    <Project Path="Eventarium.Core/Eventarium.Core.csproj" />
+    <Project Path="Eventarium.Providers.Fake/Eventarium.Providers.Fake.csproj" />
+    <Project Path="Eventarium.Providers.GitHub/Eventarium.Providers.GitHub.csproj" />
+    <Project Path="Eventarium.Server/Eventarium.Server.csproj" />
+  </Folder>
+</Solution>

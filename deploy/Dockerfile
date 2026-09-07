@@ -14,7 +14,8 @@ RUN apt-get update \
     && dotnet workload install wasm-tools
 
 # Restore project files as a separate layer so dependency downloads remain cached.
-COPY --link Directory.Build.props Eventarium.slnx global.json ./
+COPY --link global.json ./
+COPY --link src/Directory.Build.props src/Directory.Packages.props src/Eventarium.slnx src/
 COPY --link src/Eventarium.Client/*.csproj src/Eventarium.Client/
 COPY --link src/Eventarium.Core/*.csproj src/Eventarium.Core/
 COPY --link src/Eventarium.Providers.Fake/*.csproj src/Eventarium.Providers.Fake/
