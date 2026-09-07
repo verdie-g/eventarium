@@ -8,7 +8,7 @@ public enum ForgeEventKind
     /// <summary>
     /// A commit was created or published.
     /// </summary>
-    Commit,
+    Committed,
 
     /// <summary>
     /// An issue was opened.
@@ -28,7 +28,7 @@ public enum ForgeEventKind
     /// <summary>
     /// A comment was added to an issue.
     /// </summary>
-    IssueComment,
+    IssueCommented,
 
     /// <summary>
     /// A change request was opened.
@@ -48,22 +48,22 @@ public enum ForgeEventKind
     /// <summary>
     /// A comment was added to a change request.
     /// </summary>
-    ChangeRequestComment,
+    ChangeRequestCommented,
 
     /// <summary>
     /// A reply was added to an existing change-request discussion.
     /// </summary>
-    ChangeRequestReply,
+    ChangeRequestReplied,
 
     /// <summary>
     /// A review was submitted for a change request.
     /// </summary>
-    ChangeRequestReview,
+    ChangeRequestReviewed,
 
     /// <summary>
     /// A change request was merged.
     /// </summary>
-    ChangeRequestMerge
+    ChangeRequestMerged
 }
 
 /// <summary>

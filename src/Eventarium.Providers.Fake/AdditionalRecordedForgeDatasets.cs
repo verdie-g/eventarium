@@ -167,7 +167,7 @@ internal static class AdditionalRecordedForgeDatasets
         string summary,
         string createdAt) =>
         new(
-            ForgeEventKind.Commit,
+            ForgeEventKind.Committed,
             author,
             summary,
             $"https://github.com/{repository}/commit/{sha}",

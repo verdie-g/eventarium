@@ -70,7 +70,7 @@ internal static partial class GitHubWebhookMapper
 
             events.Add(new ForgeEvent(
                 $"{deliveryId}:{commit.Id}",
-                ForgeEventKind.Commit,
+                ForgeEventKind.Committed,
                 repository,
                 FirstNonEmpty(
                     payload.Sender?.Login,
@@ -165,8 +165,8 @@ internal static partial class GitHubWebhookMapper
         ForgeEvent forgeEvent = new(
             $"{deliveryId}:{comment.Id}",
             isChangeRequest
-                ? ForgeEventKind.ChangeRequestComment
-                : ForgeEventKind.IssueComment,
+                ? ForgeEventKind.ChangeRequestCommented
+                : ForgeEventKind.IssueCommented,
             repository,
             FirstNonEmpty(comment.User?.Login, payload.Sender?.Login),
             summary,
@@ -200,7 +200,7 @@ internal static partial class GitHubWebhookMapper
         {
             "opened" => ForgeEventKind.ChangeRequestOpened,
             "reopened" => ForgeEventKind.ChangeRequestReopened,
-            "closed" when pullRequest.Merged => ForgeEventKind.ChangeRequestMerge,
+            "closed" when pullRequest.Merged => ForgeEventKind.ChangeRequestMerged,
             "closed" => ForgeEventKind.ChangeRequestClosed,
             _ => null
         };
@@ -209,11 +209,11 @@ internal static partial class GitHubWebhookMapper
             return GitHubWebhookMapping.Valid(repository, []);
         }
 
-        string action = kind == ForgeEventKind.ChangeRequestMerge ? "merged" : payload.Action;
+        string action = kind == ForgeEventKind.ChangeRequestMerged ? "merged" : payload.Action;
         DateTimeOffset createdAt = kind switch
         {
             ForgeEventKind.ChangeRequestOpened => pullRequest.CreatedAt ?? receivedAt,
-            ForgeEventKind.ChangeRequestMerge => pullRequest.MergedAt ?? receivedAt,
+            ForgeEventKind.ChangeRequestMerged => pullRequest.MergedAt ?? receivedAt,
             ForgeEventKind.ChangeRequestClosed => pullRequest.ClosedAt ?? receivedAt,
             ForgeEventKind.ChangeRequestReopened => pullRequest.UpdatedAt ?? receivedAt,
             _ => receivedAt
@@ -274,7 +274,7 @@ internal static partial class GitHubWebhookMapper
         bool isSubmitted = payload.Action == "submitted";
         ForgeEvent forgeEvent = new(
             $"{deliveryId}:{review.Id}",
-            ForgeEventKind.ChangeRequestReview,
+            ForgeEventKind.ChangeRequestReviewed,
             repository,
             isSubmitted
                 ? FirstNonEmpty(review.User?.Login, payload.Sender?.Login)
@@ -317,8 +317,8 @@ internal static partial class GitHubWebhookMapper
         ForgeEvent forgeEvent = new(
             $"{deliveryId}:{comment.Id}",
             comment.InReplyToId is null
-                ? ForgeEventKind.ChangeRequestComment
-                : ForgeEventKind.ChangeRequestReply,
+                ? ForgeEventKind.ChangeRequestCommented
+                : ForgeEventKind.ChangeRequestReplied,
             repository,
             FirstNonEmpty(comment.User?.Login, payload.Sender?.Login),
             summary,

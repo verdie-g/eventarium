@@ -74,7 +74,7 @@ public static partial class GitHubEventMapper
 
         destination.Add(new ForgeEvent(
             $"{activityEvent.Id}:{head}",
-            ForgeEventKind.Commit,
+            ForgeEventKind.Committed,
             activityEvent.Repository.Name,
             activityEvent.Actor.Login,
             summary,
@@ -163,7 +163,7 @@ public static partial class GitHubEventMapper
 
         destination.Add(new ForgeEvent(
             $"{activityEvent.Id}:{comment.Id}",
-            ForgeEventKind.IssueComment,
+            ForgeEventKind.IssueCommented,
             repository,
             Fallback(comment.User?.Login, activityEvent.Actor.Login),
             summary,
@@ -219,8 +219,8 @@ public static partial class GitHubEventMapper
         destination.Add(new ForgeEvent(
             $"{activityEvent.Id}:{comment.Id}",
             canBeReply && comment.InReplyToId is not null
-                ? ForgeEventKind.ChangeRequestReply
-                : ForgeEventKind.ChangeRequestComment,
+                ? ForgeEventKind.ChangeRequestReplied
+                : ForgeEventKind.ChangeRequestCommented,
             repository,
             Fallback(comment.User?.Login, activityEvent.Actor.Login),
             summary,
@@ -258,7 +258,7 @@ public static partial class GitHubEventMapper
 
         destination.Add(new ForgeEvent(
             $"{activityEvent.Id}:{review.Id}",
-            ForgeEventKind.ChangeRequestReview,
+            ForgeEventKind.ChangeRequestReviewed,
             repository,
             Fallback(review.User?.Login, activityEvent.Actor.Login),
             summary,
@@ -282,7 +282,7 @@ public static partial class GitHubEventMapper
             "opened" => ForgeEventKind.ChangeRequestOpened,
             "closed" => ForgeEventKind.ChangeRequestClosed,
             "reopened" => ForgeEventKind.ChangeRequestReopened,
-            "merged" => ForgeEventKind.ChangeRequestMerge,
+            "merged" => ForgeEventKind.ChangeRequestMerged,
             _ => null
         };
         if (kind is null)

@@ -80,29 +80,29 @@ public sealed record DisplayedForgeEvent(
 
     private static string GetKindCssClass(ForgeEventKind kind) => kind switch
     {
-        ForgeEventKind.Commit => "event-commit",
+        ForgeEventKind.Committed => "event-commit",
         ForgeEventKind.IssueOpened or ForgeEventKind.IssueClosed or ForgeEventKind.IssueReopened => "event-issue",
-        ForgeEventKind.IssueComment or ForgeEventKind.ChangeRequestComment or ForgeEventKind.ChangeRequestReply => "event-comment",
+        ForgeEventKind.IssueCommented or ForgeEventKind.ChangeRequestCommented or ForgeEventKind.ChangeRequestReplied => "event-comment",
         ForgeEventKind.ChangeRequestOpened or ForgeEventKind.ChangeRequestClosed or ForgeEventKind.ChangeRequestReopened => "event-change-request",
-        ForgeEventKind.ChangeRequestReview => "event-review",
-        ForgeEventKind.ChangeRequestMerge => "event-merge",
+        ForgeEventKind.ChangeRequestReviewed => "event-review",
+        ForgeEventKind.ChangeRequestMerged => "event-merge",
         _ => string.Empty
     };
 
     private static string GetEventLabel(ForgeEventKind kind) => kind switch
     {
-        ForgeEventKind.Commit => "commit",
+        ForgeEventKind.Committed => "commit",
         ForgeEventKind.IssueOpened => "issue opened",
         ForgeEventKind.IssueClosed => "issue closed",
         ForgeEventKind.IssueReopened => "issue reopened",
-        ForgeEventKind.IssueComment => "issue comment",
+        ForgeEventKind.IssueCommented => "issue comment",
         ForgeEventKind.ChangeRequestOpened => "pull request opened",
         ForgeEventKind.ChangeRequestClosed => "pull request closed",
         ForgeEventKind.ChangeRequestReopened => "pull request reopened",
-        ForgeEventKind.ChangeRequestComment => "comment",
-        ForgeEventKind.ChangeRequestReply => "reply",
-        ForgeEventKind.ChangeRequestReview => "review",
-        ForgeEventKind.ChangeRequestMerge => "merged",
+        ForgeEventKind.ChangeRequestCommented => "comment",
+        ForgeEventKind.ChangeRequestReplied => "reply",
+        ForgeEventKind.ChangeRequestReviewed => "review",
+        ForgeEventKind.ChangeRequestMerged => "merged",
         _ => "event"
     };
 
