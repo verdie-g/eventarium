@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
-    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+    <!-- Once dotnet/sdk#55907 ships in the SDK, restore OverrideHtmlAssetPlaceholders=true and
+         the webassembly preload, import map, and fingerprinted bootstrap script in index.html. -->
     <StaticWebAssetSpaFallbackEnabled>true</StaticWebAssetSpaFallbackEnabled>
     <CompressionEnabled>true</CompressionEnabled>
     <RunAOTCompilation>true</RunAOTCompilation>
