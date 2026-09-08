@@ -29,6 +29,13 @@ builder.Services.AddHostedService<ForgeConnectorService>();
 
 WebApplication app = builder.Build();
 
+if (!app.Environment.IsDevelopment())
+{
+    _ = app.UseHsts();
+}
+
+_ = app.UseHttpsRedirection();
+
 app.MapStaticAssets();
 app.MapForgeFeed();
 app.MapGitHubWebhooks();
