@@ -7,12 +7,6 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_VERSION
 ARG TARGETARCH
 WORKDIR /source
 
-# Blazor WebAssembly AOT compilation requires Python and the wasm-tools workload.
-RUN apt-get update \
-    && apt-get install --no-install-recommends --yes python3 \
-    && rm -rf /var/lib/apt/lists/* \
-    && dotnet workload install wasm-tools
-
 # Restore project files as a separate layer so dependency downloads remain cached.
 COPY --link global.json ./
 COPY --link src/Directory.Build.props src/Directory.Packages.props src/Eventarium.slnx src/
@@ -31,7 +25,7 @@ RUN dotnet publish src/Eventarium.Server/Eventarium.Server.csproj \
     --output /app \
     /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:${ASPNET_VERSION} AS final
+FROM mcr.microsoft.com/dotnet/aspnet:${ASPNET_VERSION}-resolute-chiseled-composite-extra AS final
 WORKDIR /app
 EXPOSE 8080 8443
 COPY --link --from=build /app .
