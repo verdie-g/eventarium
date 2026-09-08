@@ -26,6 +26,7 @@ builder.Services.AddSingleton<IForgeSourceFactory>(_ =>
 builder.Services.AddSingleton<ForgeSourceRegistry>();
 builder.Services.AddSingleton<ForgeFeedBroker>();
 builder.Services.AddHostedService<ForgeConnectorService>();
+builder.Services.AddHealthChecks();
 
 WebApplication app = builder.Build();
 
@@ -36,6 +37,7 @@ if (!app.Environment.IsDevelopment())
 
 _ = app.UseHttpsRedirection();
 
+app.MapHealthChecks("/healthz");
 app.MapStaticAssets();
 app.MapForgeFeed();
 app.MapGitHubWebhooks();
