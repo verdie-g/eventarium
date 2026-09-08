@@ -67,9 +67,14 @@ a {
 
 .wordmark {
     display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
+    align-items: center;
+    gap: 0.45rem;
     text-transform: uppercase;
+}
+
+.wordmark .brand-mark {
+    width: 2rem;
+    height: 2rem;
 }
 
 .wordmark-name {
@@ -343,8 +348,9 @@ a {
     text-transform: uppercase;
 }
 
-.boot-screen svg {
-    fill: currentColor;
+.boot-screen .brand-mark {
+    width: 8rem;
+    height: 8rem;
     animation: boot-pulse 1.6s ease-in-out infinite;
 }
 
@@ -358,8 +364,9 @@ a {
     text-align: center;
 }
 
-.not-found svg {
-    fill: currentColor;
+.not-found .brand-mark {
+    width: 8rem;
+    height: 8rem;
 }
 
 .not-found h1 {
@@ -458,7 +465,7 @@ a {
     .flying-event-body,
     .package,
     .status-light,
-    .boot-screen svg {
+    .boot-screen .brand-mark {
         animation: none;
     }
 }
