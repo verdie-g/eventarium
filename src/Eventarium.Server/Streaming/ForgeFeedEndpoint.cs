@@ -3,6 +3,7 @@ using System.Net.ServerSentEvents;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Eventarium.Core.Forge;
+using Eventarium.Server.Telemetry;
 
 namespace Eventarium.Server.Streaming;
 
@@ -16,6 +17,7 @@ public static class ForgeFeedEndpoint
     private static Microsoft.AspNetCore.Http.HttpResults.ServerSentEventsResult<string> CreateResult(
         HttpContext context,
         ForgeFeedBroker broker,
+        EventariumMetrics metrics,
         CancellationToken cancellationToken)
     {
         context.Response.Headers.CacheControl = "no-cache, no-store";
@@ -27,11 +29,12 @@ public static class ForgeFeedEndpoint
             out long revision) && revision >= 0
                 ? revision
                 : null;
-        return TypedResults.ServerSentEvents(GetEventsAsync(broker, lastRevision, cancellationToken));
+        return TypedResults.ServerSentEvents(GetEventsAsync(broker, metrics, lastRevision, cancellationToken));
     }
 
     private static async IAsyncEnumerable<SseItem<string>> GetEventsAsync(
         ForgeFeedBroker broker,
+        EventariumMetrics metrics,
         long? lastRevision,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -61,6 +64,7 @@ public static class ForgeFeedEndpoint
                 string json = JsonSerializer.Serialize(
                     message,
                     ForgeFeedJsonSerializerContext.Default.ForgeFeedMessage);
+                metrics.RecordEventsWritten(message.Events.Count);
                 yield return new SseItem<string>(json, eventName)
                 {
                     EventId = message.Revision.ToString(System.Globalization.CultureInfo.InvariantCulture)

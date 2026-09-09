@@ -1,5 +1,6 @@
 using Eventarium.Providers.GitHub;
 using Eventarium.Server.Connectors;
+using Eventarium.Server.Telemetry;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Eventarium.Server.Streaming;
@@ -20,6 +21,7 @@ public static class GitHubWebhookEndpoint
         string sourceId,
         HttpRequest request,
         ForgeSourceRegistry registry,
+        EventariumMetrics metrics,
         ILogger<GitHubWebhookEventProvider> logger,
         CancellationToken cancellationToken)
     {
@@ -28,6 +30,8 @@ public static class GitHubWebhookEndpoint
         {
             return Results.NotFound();
         }
+
+        metrics.RecordGitHubWebhookReceived();
 
         if (!request.HasJsonContentType())
         {

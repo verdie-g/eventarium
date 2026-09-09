@@ -3,9 +3,39 @@ using Eventarium.Providers.GitHub;
 using Eventarium.Server.Configuration;
 using Eventarium.Server.Connectors;
 using Eventarium.Server.Streaming;
+using Eventarium.Server.Telemetry;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+bool hasOtlpEndpoint =
+    !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]) ||
+    !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_LOGS_ENDPOINT"]) ||
+    !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"]) ||
+    !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"]);
+if (hasOtlpEndpoint)
+{
+    _ = builder.Services
+        .AddOpenTelemetry()
+        .ConfigureResource(resource => resource
+            .AddService(
+                serviceName: "eventarium",
+                autoGenerateServiceInstanceId: false,
+                serviceInstanceId: "1")
+            .AddEnvironmentVariableDetector())
+        .WithTracing(tracing => tracing.AddSource("*"))
+        .WithMetrics(metrics => metrics.AddMeter("*"))
+        .WithLogging(
+            configureBuilder: _ => { },
+            configureOptions: options =>
+            {
+                options.IncludeScopes = true;
+                options.IncludeFormattedMessage = true;
+            })
+        .UseOtlpExporter();
+}
 
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -34,6 +64,7 @@ builder.Services.AddSingleton<IForgeSourceFactory>(_ =>
         Environment.GetEnvironmentVariable("GITHUB_WEBHOOK_SECRET")));
 builder.Services.AddSingleton<ForgeSourceRegistry>();
 builder.Services.AddSingleton<ForgeFeedBroker>();
+builder.Services.AddSingleton<EventariumMetrics>();
 builder.Services.AddHostedService<ForgeConnectorService>();
 builder.Services.AddHealthChecks();
 
