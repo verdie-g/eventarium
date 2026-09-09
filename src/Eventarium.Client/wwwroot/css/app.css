@@ -122,11 +122,8 @@ a {
 }
 
 /*
- * Flight motion is composed across three nested elements so each part can use
- * different timing without affecting the others:
- *   .flying-event      moves horizontally at a constant speed and fades;
- *   .flying-event-body follows the broad vertical arc;
- *   .package           adds a small, repeating bob and rock.
+ * Flight motion uses one transform layer for horizontal travel and the broad
+ * vertical arc. The nested package adds a small, repeating bob and rock.
  */
 .flying-event {
     position: absolute;
@@ -146,8 +143,6 @@ a {
 .flying-event-body {
     display: block;
     width: 100%;
-    will-change: transform;
-    animation: arc-flight var(--duration) ease-in-out forwards;
 }
 
 .flying-event-payload {
@@ -158,7 +153,6 @@ a {
 }
 
 .flying-event:is(:hover, :focus-visible),
-.flying-event:is(:hover, :focus-visible) .flying-event-body,
 .flying-event:is(:hover, :focus-visible) .package {
     animation-play-state: paused;
 }
@@ -182,9 +176,7 @@ a {
     transform-origin: right center;
     scale: var(--scale);
     will-change: transform;
-    animation:
-        airframe-bob var(--bob-duration) ease-in-out var(--motion-delay) infinite alternate,
-        airframe-rock var(--rock-duration) ease-in-out var(--motion-delay) infinite alternate;
+    animation: airframe-motion var(--package-motion-duration) ease-in-out var(--motion-delay) infinite alternate;
 }
 
 .package-face {
@@ -380,48 +372,58 @@ a {
     font-size: 0.72rem;
 }
 
-/* Horizontal travel stays linear; vertical easing belongs to the nested body. */
+/* Linear horizontal positions keep a constant pace while sampled vertical positions approximate an eased arc. */
 @keyframes fly-across {
     0% {
         opacity: 0;
         transform: translate3d(calc(-100% - 5vw), 0, 0);
     }
 
-    8%,
+    8% {
+        opacity: var(--event-opacity);
+    }
+
+    12.5% {
+        transform: translate3d(calc(-75% + 8.125vw), var(--flight-y-12), 0);
+    }
+
+    25% {
+        transform: translate3d(calc(-50% + 21.25vw), var(--flight-y-25), 0);
+    }
+
+    37.5% {
+        transform: translate3d(calc(-25% + 34.375vw), var(--flight-y-37), 0);
+    }
+
+    50% {
+        transform: translate3d(47.5vw, var(--flight-y-mid), 0);
+    }
+
+    62.5% {
+        transform: translate3d(calc(25% + 60.625vw), var(--flight-y-62), 0);
+    }
+
+    75% {
+        transform: translate3d(calc(50% + 73.75vw), var(--flight-y-75), 0);
+    }
+
+    87.5% {
+        transform: translate3d(calc(75% + 86.875vw), var(--flight-y-87), 0);
+    }
+
     88% {
         opacity: var(--event-opacity);
     }
 
     100% {
         opacity: 0;
-        transform: translate3d(calc(100vw + 100%), 0, 0);
+        transform: translate3d(calc(100vw + 100%), var(--drift), 0);
     }
 }
 
-/* Ease into the signed midpoint, then ease toward the final drift. */
-@keyframes arc-flight {
-    0% {
-        transform: translate3d(0, 0, 0);
-    }
-
-    50% {
-        transform: translate3d(0, var(--flight-y-mid), 0);
-    }
-
-    100% {
-        transform: translate3d(0, var(--drift), 0);
-    }
-}
-
-/* Separate transform properties let bob and rock run at unrelated randomized periods. */
-@keyframes airframe-bob {
-    from { translate: 0 -2px; }
-    to { translate: 0 2px; }
-}
-
-@keyframes airframe-rock {
-    from { rotate: -0.55deg; }
-    to { rotate: 0.55deg; }
+@keyframes airframe-motion {
+    from { transform: translateY(-2px) rotate(-0.55deg); }
+    to { transform: translateY(2px) rotate(0.55deg); }
 }
 
 @keyframes status-breathe {
@@ -462,7 +464,6 @@ a {
         animation-duration: 1ms;
     }
 
-    .flying-event-body,
     .package,
     .status-light,
     .boot-screen .brand-mark {

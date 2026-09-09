@@ -12,6 +12,7 @@ builder.Services.AddSingleton(new HttpClient
 {
     BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
 });
+builder.Services.AddSingleton<DisplayMotionProfile>();
 builder.Services.AddSingleton<ForgeFeedStore>();
 builder.Services.AddSingleton<IForgeFeed>(services => services.GetRequiredService<ForgeFeedStore>());
 builder.Services.AddHostedService<ForgeFeedHostedService>();

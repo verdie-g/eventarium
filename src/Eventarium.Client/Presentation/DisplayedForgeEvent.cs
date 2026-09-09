@@ -22,10 +22,8 @@ public sealed record DisplayedForgeEvent(
     private const int MaximumVerticalDriftPixels = 42;
     private const int MinimumArcHeightPixels = 36;
     private const int MaximumArcHeightPixels = 72;
-    private const double MinimumBobDurationSeconds = 2.8;
-    private const double MaximumBobDurationSeconds = 4.6;
-    private const double MinimumRockDurationSeconds = 4.2;
-    private const double MaximumRockDurationSeconds = 6.8;
+    private const double MinimumPackageMotionDurationSeconds = 4.2;
+    private const double MaximumPackageMotionDurationSeconds = 6.8;
     private const int FirstEventZIndex = 2;
 
     // Profiles progress from distant, slow objects to nearby, fast objects.
@@ -38,13 +36,15 @@ public sealed record DisplayedForgeEvent(
 
     public static DisplayedForgeEvent Create(
         ForgeFeedEvent feedEvent,
-        ForgeSourceDescriptor? source)
+        ForgeSourceDescriptor? source,
+        double flightDurationScale)
     {
         ForgeEvent forgeEvent = feedEvent.Event;
         int depth = Random.Shared.Next(DepthProfiles.Length);
         DepthProfile profile = DepthProfiles[depth];
         double scale = RandomBetween(profile.MinimumScale, profile.MaximumScale);
-        double duration = RandomBetween(profile.MinimumDurationSeconds, profile.MaximumDurationSeconds);
+        double duration = RandomBetween(profile.MinimumDurationSeconds, profile.MaximumDurationSeconds) *
+            flightDurationScale;
         int lane = Random.Shared.Next(MinimumLanePercent, MaximumLanePercent + 1);
 
         // The signed arc height bends the path above or below its lane. Midpoint combines that arc
@@ -54,14 +54,22 @@ public sealed record DisplayedForgeEvent(
             (Random.Shared.Next(2) == 0 ? -1 : 1);
         int midpoint = (int)Math.Round((drift * 0.5) + arcHeight);
 
-        // Independent randomized periods and a negative delay keep nearby events from bobbing
-        // and rocking in sync, even when they enter the flight zone at the same time.
-        double bobDuration = RandomBetween(MinimumBobDurationSeconds, MaximumBobDurationSeconds);
-        double rockDuration = RandomBetween(MinimumRockDurationSeconds, MaximumRockDurationSeconds);
-        double motionDelay = -RandomBetween(0, MaximumRockDurationSeconds);
+        // Several linear keyframes approximate the former eased arc while horizontal progress remains linear.
+        int y12 = Interpolate(0, midpoint, 0.25);
+        int y25 = Interpolate(0, midpoint, 0.5);
+        int y37 = Interpolate(0, midpoint, 0.75);
+        int y62 = Interpolate(midpoint, drift, 0.25);
+        int y75 = Interpolate(midpoint, drift, 0.5);
+        int y87 = Interpolate(midpoint, drift, 0.75);
+
+        // A negative delay keeps nearby package motions out of sync.
+        double packageMotionDuration = RandomBetween(
+            MinimumPackageMotionDurationSeconds,
+            MaximumPackageMotionDurationSeconds);
+        double motionDelay = -RandomBetween(0, MaximumPackageMotionDurationSeconds);
 
         string cssVariables = FormattableString.Invariant(
-            $"--lane:{lane}%;--duration:{duration:0.0}s;--scale:{scale:0.00};--drift:{drift}px;--flight-y-mid:{midpoint}px;--bob-duration:{bobDuration:0.0}s;--rock-duration:{rockDuration:0.0}s;--motion-delay:{motionDelay:0.0}s;--event-opacity:{profile.Opacity:0.00};--layer:{depth + FirstEventZIndex}");
+            $"--lane:{lane}%;--duration:{duration:0.0}s;--scale:{scale:0.00};--drift:{drift}px;--flight-y-12:{y12}px;--flight-y-25:{y25}px;--flight-y-37:{y37}px;--flight-y-mid:{midpoint}px;--flight-y-62:{y62}px;--flight-y-75:{y75}px;--flight-y-87:{y87}px;--package-motion-duration:{packageMotionDuration:0.0}s;--motion-delay:{motionDelay:0.0}s;--event-opacity:{profile.Opacity:0.00};--layer:{depth + FirstEventZIndex}");
 
         return new DisplayedForgeEvent(
             Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture),
@@ -105,6 +113,12 @@ public sealed record DisplayedForgeEvent(
         ForgeEventKind.ChangeRequestMerged => "merged",
         _ => "event"
     };
+
+    private static int Interpolate(int start, int end, double progress)
+    {
+        double easedProgress = progress * progress * (3 - (2 * progress));
+        return (int)Math.Round(start + ((end - start) * easedProgress));
+    }
 
     private static double RandomBetween(double minimum, double maximum) =>
         minimum + (Random.Shared.NextDouble() * (maximum - minimum));

@@ -1,6 +1,8 @@
 ﻿@page "/"
+@using Microsoft.JSInterop
 @implements IDisposable
 @inject HomePageViewModel ViewModel
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Eventarium</PageTitle>
 
@@ -62,6 +64,27 @@
     protected override void OnInitialized()
     {
         ViewModel.Changed += HandleViewModelChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        try
+        {
+            await using IJSObjectReference module = await JSRuntime.InvokeAsync<IJSObjectReference>(
+                "import",
+                "./js/display.js");
+            double viewportWidth = await module.InvokeAsync<double>("getViewportWidth");
+            ViewModel.SetViewportWidth(viewportWidth);
+        }
+        catch (JSException)
+        {
+            // Keep reference pacing when browser metrics are unavailable.
+        }
     }
 
     public void Dispose()

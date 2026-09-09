@@ -1,9 +1,10 @@
 using System.Threading.Channels;
+using Eventarium.Client.Presentation;
 using Eventarium.Core.Forge;
 
 namespace Eventarium.Client.Streaming;
 
-public sealed class ForgeFeedStore : IForgeFeed
+public sealed class ForgeFeedStore(DisplayMotionProfile displayMotionProfile) : IForgeFeed
 {
     private const int MaximumPendingEvents = 240;
     private const int MaximumReleasedEventHistory = 32;
@@ -154,10 +155,12 @@ public sealed class ForgeFeedStore : IForgeFeed
                 }
 
                 Changed?.Invoke();
+                int releaseDelayMilliseconds = Random.Shared.Next(
+                    MinimumReleaseDelayMilliseconds,
+                    MaximumReleaseDelayMilliseconds + 1);
                 await Task.Delay(
-                    Random.Shared.Next(
-                        MinimumReleaseDelayMilliseconds,
-                        MaximumReleaseDelayMilliseconds + 1),
+                    TimeSpan.FromMilliseconds(
+                        releaseDelayMilliseconds * displayMotionProfile.FlightDurationScale),
                     cancellationToken);
             }
         }

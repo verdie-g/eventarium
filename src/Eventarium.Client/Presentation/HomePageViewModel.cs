@@ -6,12 +6,14 @@ namespace Eventarium.Client.Presentation;
 public sealed class HomePageViewModel : IDisposable
 {
     private readonly IForgeFeed _feed;
+    private readonly DisplayMotionProfile _displayMotionProfile;
     private readonly HashSet<string> _displayedEventIds = [with(StringComparer.Ordinal)];
     private IReadOnlyList<DisplayedForgeEvent> _activeEvents = [];
 
-    public HomePageViewModel(IForgeFeed feed)
+    public HomePageViewModel(IForgeFeed feed, DisplayMotionProfile displayMotionProfile)
     {
         _feed = feed;
+        _displayMotionProfile = displayMotionProfile;
         _feed.Changed += HandleFeedChanged;
         Refresh();
     }
@@ -27,6 +29,8 @@ public sealed class HomePageViewModel : IDisposable
     public string EventRegionLabel => $"Activity from {_feed.Sources.Count} forge sources";
 
     public string OpenEventTitle => "Open this event on its forge";
+
+    public void SetViewportWidth(double viewportWidth) => _displayMotionProfile.SetViewportWidth(viewportWidth);
 
     public void CompleteFlight(string displayId)
     {
@@ -123,7 +127,8 @@ public sealed class HomePageViewModel : IDisposable
 
             activeEvents.Add(DisplayedForgeEvent.Create(
                 feedEvent,
-                GetSource(feedEvent.SourceId)?.Descriptor));
+                GetSource(feedEvent.SourceId)?.Descriptor,
+                _displayMotionProfile.FlightDurationScale));
         }
 
         _activeEvents = activeEvents;
