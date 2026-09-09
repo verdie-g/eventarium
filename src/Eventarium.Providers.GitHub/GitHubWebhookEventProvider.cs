@@ -12,7 +12,8 @@ public sealed class GitHubWebhookEventProvider : IForgeEventProvider, IGitHubWeb
     private const int UpdateCapacity = 256;
     private readonly Lock _gate = new();
     private readonly byte[] _secret;
-    private readonly HashSet<string> _repositories;
+    private readonly HashSet<string>? _repositories;
+    private readonly HashSet<string>? _organizations;
     private readonly HashSet<string> _seenDeliveryIds = [with(StringComparer.Ordinal)];
     private readonly Queue<string> _seenDeliveryOrder = new();
     private readonly Channel<ForgeEventUpdate> _updates = Channel.CreateBounded<ForgeEventUpdate>(
@@ -23,19 +24,27 @@ public sealed class GitHubWebhookEventProvider : IForgeEventProvider, IGitHubWeb
             SingleWriter = false
         });
 
-    public GitHubWebhookEventProvider(string secret, IEnumerable<ForgeRepository> repositories)
+    public GitHubWebhookEventProvider(
+        string secret,
+        IEnumerable<ForgeRepository>? repositories,
+        IEnumerable<string>? organizations = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(secret);
-        ArgumentNullException.ThrowIfNull(repositories);
 
         _secret = Encoding.UTF8.GetBytes(secret);
-        _repositories = repositories
+        _repositories = repositories?
             .Select(repository => repository.FullName)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        _organizations = organizations?.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        if (_repositories.Count == 0)
+        if (_repositories is { Count: 0 })
         {
-            throw new ArgumentException("At least one repository must be configured.", nameof(repositories));
+            _repositories = null;
+        }
+
+        if (_organizations is { Count: 0 })
+        {
+            _organizations = null;
         }
     }
 
@@ -96,7 +105,7 @@ public sealed class GitHubWebhookEventProvider : IForgeEventProvider, IGitHubWeb
             return GitHubWebhookReceiveResult.InvalidPayload;
         }
 
-        if (mapping.Repository is not null && !_repositories.Contains(mapping.Repository))
+        if (mapping.Repository is not null && !IsRepositoryAllowed(mapping.Repository))
         {
             return GitHubWebhookReceiveResult.RepositoryNotAllowed;
         }
@@ -131,5 +140,21 @@ public sealed class GitHubWebhookEventProvider : IForgeEventProvider, IGitHubWeb
         }
 
         return GitHubWebhookReceiveResult.Accepted;
+    }
+
+    private bool IsRepositoryAllowed(string repository)
+    {
+        if (_repositories is not null && !_repositories.Contains(repository))
+        {
+            return false;
+        }
+
+        if (_organizations is null)
+        {
+            return true;
+        }
+
+        int separatorIndex = repository.IndexOf('/');
+        return separatorIndex > 0 && _organizations.Contains(repository[..separatorIndex]);
     }
 }

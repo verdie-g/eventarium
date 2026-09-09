@@ -15,7 +15,7 @@ public sealed class GitHubForgeSourceFactory(
         string sourceId,
         ForgeSourceOptions sourceOptions)
     {
-        if (sourceOptions.Repositories.Count == 0)
+        if (sourceOptions.Repositories is not { Count: > 0 } repositories)
         {
             throw new InvalidOperationException(
                 $"GitHub source '{sourceId}' must configure at least one repository.");
@@ -27,13 +27,13 @@ public sealed class GitHubForgeSourceFactory(
                 $"GitHub source '{sourceId}' requires the GITHUB_TOKEN environment variable.");
         }
 
-        ForgeRepository[] repositories = sourceOptions.Repositories
+        ForgeRepository[] parsedRepositories = repositories
             .Select(repository => ParseRepository(sourceId, repository))
             .ToArray();
         GitHubRepositoryEventPoller poller = new(
             httpClientFactory.CreateClient(nameof(GitHubRepositoryEventPoller)),
             accessToken);
-        PollingForgeEventProvider provider = new(poller, repositories);
+        PollingForgeEventProvider provider = new(poller, parsedRepositories);
         ForgeSourceDescriptor descriptor = new(
             sourceId,
             "GitHub",

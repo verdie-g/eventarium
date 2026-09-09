@@ -48,6 +48,13 @@ public sealed class ForgeSourceOptions
 
     /// <summary>
     /// Gets the repository identifiers in the format expected by the connector.
+    /// An omitted or empty collection disables this filter.
     /// </summary>
-    public IReadOnlyList<string> Repositories { get; init; } = [];
+    public IReadOnlyList<string>? Repositories { get; init; }
+
+    /// <summary>
+    /// Gets the organization identifiers in the format expected by the connector.
+    /// An omitted or empty collection disables this filter.
+    /// </summary>
+    public IReadOnlyList<string>? Organizations { get; init; }
 }

@@ -12,22 +12,19 @@ public sealed class GitHubWebhookSourceFactory(string? webhookSecret) : IForgeSo
         string sourceId,
         ForgeSourceOptions sourceOptions)
     {
-        if (sourceOptions.Repositories.Count == 0)
-        {
-            throw new InvalidOperationException(
-                $"GitHub webhook source '{sourceId}' must configure at least one repository.");
-        }
-
         if (string.IsNullOrWhiteSpace(webhookSecret))
         {
             throw new InvalidOperationException(
                 $"GitHub webhook source '{sourceId}' requires the GITHUB_WEBHOOK_SECRET environment variable.");
         }
 
-        ForgeRepository[] repositories = sourceOptions.Repositories
+        ForgeRepository[]? repositories = sourceOptions.Repositories?
             .Select(repository => ParseRepository(sourceId, repository))
             .ToArray();
-        GitHubWebhookEventProvider provider = new(webhookSecret, repositories);
+        string[]? organizations = sourceOptions.Organizations?
+            .Select(organization => ParseOrganization(sourceId, organization))
+            .ToArray();
+        GitHubWebhookEventProvider provider = new(webhookSecret, repositories, organizations);
         ForgeSourceDescriptor descriptor = new(
             sourceId,
             "GitHub",
@@ -48,5 +45,17 @@ public sealed class GitHubWebhookSourceFactory(string? webhookSecret) : IForgeSo
         }
 
         return new ForgeRepository(segments[0], segments[1]);
+    }
+
+    private static string ParseOrganization(string sourceId, string value)
+    {
+        string organization = value.Trim();
+        if (string.IsNullOrWhiteSpace(organization) || organization.Contains('/'))
+        {
+            throw new InvalidOperationException(
+                $"Organization '{value}' in GitHub webhook source '{sourceId}' must use the organization login.");
+        }
+
+        return organization;
     }
 }
