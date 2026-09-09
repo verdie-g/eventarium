@@ -25,9 +25,10 @@ RUN dotnet publish src/Eventarium.Server/Eventarium.Server.csproj \
     --output /app \
     /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:${ASPNET_VERSION}-resolute-chiseled-composite-extra AS final
+FROM mcr.microsoft.com/dotnet/aspnet:${ASPNET_VERSION}-alpine3.24-composite-extra AS final
+RUN apk add --no-cache libmsquic
 WORKDIR /app
-EXPOSE 8080 8443
+EXPOSE 8080 443/tcp 443/udp
 COPY --link --from=build /app .
 USER $APP_UID
 ENTRYPOINT ["dotnet", "Eventarium.Server.dll"]

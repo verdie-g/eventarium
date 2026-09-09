@@ -3,8 +3,17 @@ using Eventarium.Providers.GitHub;
 using Eventarium.Server.Configuration;
 using Eventarium.Server.Connectors;
 using Eventarium.Server.Streaming;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ConfigureEndpointDefaults(listenOptions =>
+    {
+        listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
+    });
+});
 
 builder.Services.Configure<ForgeOptions>(builder.Configuration.GetSection("Eventarium:Forge"));
 builder.Services.AddHttpClient(nameof(GitHubRepositoryEventPoller), httpClient =>
