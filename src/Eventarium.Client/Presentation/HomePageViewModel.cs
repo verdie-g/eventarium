@@ -6,7 +6,7 @@ namespace Eventarium.Client.Presentation;
 public sealed class HomePageViewModel : IDisposable
 {
     private readonly IForgeFeed _feed;
-    private readonly HashSet<string> _displayedEventIds = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _displayedEventIds = [with(StringComparer.Ordinal)];
     private IReadOnlyList<DisplayedForgeEvent> _activeEvents = [];
 
     public HomePageViewModel(IForgeFeed feed)

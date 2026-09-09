@@ -18,9 +18,9 @@ public sealed class ForgeFeedStore : IForgeFeed
             SingleReader = true,
             SingleWriter = false
         });
-    private readonly HashSet<string> _seenEventIds = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _seenEventIds = [with(StringComparer.Ordinal)];
     private readonly Queue<string> _seenEventOrder = new();
-    private readonly Dictionary<string, ForgeSourceState> _sources = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ForgeSourceState> _sources = [with(StringComparer.Ordinal)];
     private readonly CancellationTokenSource _stopping = new();
     private IReadOnlyList<ForgeFeedEvent> _releasedEvents = [];
     private Task? _releaseTask;

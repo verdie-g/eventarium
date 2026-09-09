@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
-ARG DOTNET_SDK_VERSION=11.0.100-preview.7
-ARG ASPNET_VERSION=11.0.0-preview.7
+ARG DOTNET_SDK_VERSION=11.0.100-rc.1
+ARG ASPNET_VERSION=11.0.0-rc.1
 
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_VERSION} AS build
 ARG TARGETARCH

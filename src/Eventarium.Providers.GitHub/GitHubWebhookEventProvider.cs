@@ -13,7 +13,7 @@ public sealed class GitHubWebhookEventProvider : IForgeEventProvider, IGitHubWeb
     private readonly Lock _gate = new();
     private readonly byte[] _secret;
     private readonly HashSet<string> _repositories;
-    private readonly HashSet<string> _seenDeliveryIds = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _seenDeliveryIds = [with(StringComparer.Ordinal)];
     private readonly Queue<string> _seenDeliveryOrder = new();
     private readonly Channel<ForgeEventUpdate> _updates = Channel.CreateBounded<ForgeEventUpdate>(
         new BoundedChannelOptions(UpdateCapacity)

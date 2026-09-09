@@ -12,7 +12,7 @@ public sealed class ForgeFeedBroker
     private readonly int _historyCapacity;
     private readonly List<ForgeFeedEvent> _history = [];
     private readonly Queue<ForgeFeedMessage> _replay = new();
-    private readonly HashSet<string> _seenEventIds = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _seenEventIds = [with(StringComparer.Ordinal)];
     private readonly Queue<string> _seenEventOrder = new();
     private readonly Dictionary<string, ForgeSourceState> _sources;
     private readonly Dictionary<Guid, Channel<ForgeFeedMessage>> _subscribers = [];
