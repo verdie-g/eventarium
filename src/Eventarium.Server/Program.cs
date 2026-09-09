@@ -17,11 +17,13 @@ bool hasOtlpEndpoint =
     !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"]);
 if (hasOtlpEndpoint)
 {
+    Version serviceVersion = typeof(Program).Assembly.GetName().Version ?? new Version(0, 0, 0);
     _ = builder.Services
         .AddOpenTelemetry()
         .ConfigureResource(resource => resource
             .AddService(
                 serviceName: "eventarium",
+                serviceVersion: serviceVersion.ToString(fieldCount: 3),
                 autoGenerateServiceInstanceId: false,
                 serviceInstanceId: "1")
             .AddEnvironmentVariableDetector())
